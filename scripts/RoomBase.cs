@@ -67,12 +67,9 @@ public abstract partial class RoomBase : Node2D
         // Floor collision
         AddFloorCollider();
 
-        // Optional left/right wall collision (0 means no wall)
-        if (WallThick > 0)
-        {
-            AddWallCollider(true);   // left
-            AddWallCollider(false);  // right
-        }
+        // Boundary walls — always present so the player can't walk out of bounds
+        AddWallCollider(true);
+        AddWallCollider(false);
     }
 
     private void AddFloorCollider()
@@ -97,12 +94,13 @@ public abstract partial class RoomBase : Node2D
         body.CollisionMask  = 0;
         var shape = new CollisionShape2D();
         var rect  = new RectangleShape2D();
-        rect.Size = new Vector2(WallThick + 20, RoomHeight * 2);
+        rect.Size = new Vector2(80, RoomHeight * 2);
         shape.Shape = rect;
         body.AddChild(shape);
+        // Position wall half-slab outside the room edge so player stops exactly at the boundary
         body.Position = left
-            ? new Vector2(WallThick / 2f - 10, RoomHeight / 2f)
-            : new Vector2(RoomWidth - WallThick / 2f + 10, RoomHeight / 2f);
+            ? new Vector2(-40, RoomHeight / 2f)
+            : new Vector2(RoomWidth + 40, RoomHeight / 2f);
         AddChild(body);
     }
 
@@ -149,10 +147,10 @@ public abstract partial class RoomBase : Node2D
         pickup.SetItem(item);
         pickup.Position = worldPos;
 
-        // Trigger shape
+        // Trigger shape — large radius so it's reachable from floor level
         var col = new CollisionShape2D();
         var sh  = new CircleShape2D();
-        sh.Radius = 36f;
+        sh.Radius = 55f;
         col.Shape = sh;
         pickup.AddChild(col);
         AddChild(pickup);

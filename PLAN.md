@@ -38,14 +38,25 @@ Third-person 2D side-scrolling indoor exploration game. Player starts in a hallw
 - [x] HUD visibility: hotbar/prompt hidden on main menu, shown in game rooms
 - [x] Hero sprite white background removed (PIL threshold >230)
 
+## Bug Fixes (post-MVP)
+
+- [x] Sprite region seam fixed — inset RegionRect 1px at interior edges to stop LinearWithMipmaps bleed
+- [x] Walk-bob animation — sine-wave offset drives subtle step rhythm
+- [x] Apple pickup — lowered to FloorY-21 so player capsule always overlaps; hitbox radius 36→55
+- [x] Out-of-bounds walking — RoomBase now always adds boundary wall colliders at room edges
+- [x] GameDialogues.cs — all dialogue content centralised; MotherNPCController + HallwayScene use it
+- [x] Quest dialogue continue bug — DialogueManager.JustFinished flag blocks same-frame re-trigger
+- [x] Key rebinding UI in settings (move_left/right, run, interact) + Reset to defaults
+- [x] Resolution presets in settings (720p / 900p / 1080p / 1440p) + auto-center on apply
+- [x] Fullscreen fix — refresh guard prevents double-fire; ApplyFullscreen restores saved resolution on un-fullscreen
+
 ## Verify
 
-- Player walks left/right with correct sprite flip
-- Inventory slots fill when items are picked up; mouse wheel cycles selection
-- Quest UI appears when mother gives quest; shows ✓ Complete! on completion
-- Dialogue box advances with E; disappears after last line
-- Door transitions: fade-out → new room → fade-in, player at correct spawn
-- Mother dialogue flow: not-started → active (no item) → complete (has item)
-- Orb follows player with hover oscillation
-- Settings save/load between sessions (user://settings.cfg)
-- No camera swoop on room entry
+- Player walks left/right with correct sprite flip; no seam line visible on direction change
+- Walk animation shows subtle up/down bob
+- Apple can be picked up from the table
+- Player cannot walk past left/right room edges in any room
+- All dialogue text is served from GameDialogues.cs
+- Pressing E on the last quest-dialogue line does NOT immediately trigger the "no item yet" dialogue
+- Rebind keys in settings; new keys work in-game; survives quit-reopen
+- Resolution change resizes window correctly; fullscreen toggle works

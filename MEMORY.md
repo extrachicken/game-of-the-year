@@ -33,6 +33,15 @@
 - Gemini API key available but both keys are on free tier with quota = 0 for gemini-3.1-flash-image
 - Reference.png not generated; proceeding without visual target
 
+## Post-MVP bug fixes applied (2026-04-20)
+- Sprite seam: inset RegionRect by 1px on interior edges; LinearWithMipmaps bleeds across atlas boundaries
+- Quest dialogue double-trigger: DialogueManager.JustFinished flag (true for 1 frame after close); PlayerController.HandleInteractInput checks it
+- Out-of-bounds: RoomBase.SpawnGeometry always calls AddWallCollider (removed WallThick > 0 guard)
+- Apple pickup: lowered to floor level (FloorY-21) + hitbox radius 55px
+- GameDialogues.cs centralises all dialogue; scripts call static methods
+- SettingsManager: Resolution + keybinding persistence; ApplyFullscreen restores window size on un-fullscreen
+- MainMenuUI: _refreshing flag prevents slider/toggle callbacks from firing during RefreshSettingsControls
+
 ## Known issues / quirks applied
 - SetScript() quirk: temp parent pattern used in all scene builders
 - Camera2D lerp swoop: _initialized guard applied in PlayerController._Ready()

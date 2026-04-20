@@ -23,7 +23,12 @@ public partial class DialogueManager : Node
 
     private Queue<DialogueLine> _lineQueue = new();
     private bool _isShowing = false;
+    private bool _justFinished = false;
     private Action? _onComplete;
+
+    /// True for exactly one frame after a dialogue closes — lets callers ignore
+    /// the same E press that dismissed the final line.
+    public bool JustFinished => _justFinished;
 
     // UI elements
     private CanvasLayer _layer = null!;
@@ -33,6 +38,11 @@ public partial class DialogueManager : Node
     private Label _advanceHint = null!;
 
     public bool IsShowing => _isShowing;
+
+    public override void _Process(double delta)
+    {
+        if (_justFinished) _justFinished = false;
+    }
 
     public override void _Ready()
     {
@@ -104,6 +114,7 @@ public partial class DialogueManager : Node
     private void FinishDialogue()
     {
         _isShowing = false;
+        _justFinished = true;
         _panel.Visible = false;
         _onComplete?.Invoke();
         _onComplete = null;

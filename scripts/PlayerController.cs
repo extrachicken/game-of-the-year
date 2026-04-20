@@ -18,8 +18,10 @@ public partial class PlayerController : CharacterBody2D
     private int  _spriteHeight;  // full texture height
     private int  _frameWidth;    // width of one character view
 
-    private bool _facingRight = true;
-    private bool _initialized = false; // camera lerp guard (see quirks.md)
+    private bool  _facingRight = true;
+    private bool  _initialized = false; // camera lerp guard (see quirks.md)
+    private float _baseOffsetY = 0f;    // sprite feet-at-origin offset
+    private float _walkPhase   = 0f;    // drives walk-bob sine wave
 
     public override void _Ready()
     {
@@ -39,7 +41,8 @@ public partial class PlayerController : CharacterBody2D
             _sprite.TextureFilter = CanvasItem.TextureFilterEnum.LinearWithMipmaps;
             float scale = 240f / _spriteHeight; // ~240px tall at 1080p
             _sprite.Scale = new Vector2(scale, scale);
-            _sprite.Offset = new Vector2(0, -_spriteHeight / 2f + 72f); // feet at origin
+            _baseOffsetY = -_spriteHeight / 2f + 72f; // feet at origin
+            _sprite.Offset = new Vector2(0, _baseOffsetY);
 
             _sprite.RegionEnabled = true;
             SetIdlePose(); // start with front view
@@ -67,7 +70,7 @@ public partial class PlayerController : CharacterBody2D
             vel.X = Mathf.MoveToward(vel.X, 0f, WalkSpeed * 6f * dt);
             Velocity = vel;
             MoveAndSlide();
-            UpdateSpriteAnimation(0f);
+            UpdateSpriteAnimation(0f, dt);
             return;
         }
 
@@ -82,7 +85,7 @@ public partial class PlayerController : CharacterBody2D
         Velocity = vel;
         MoveAndSlide();
 
-        UpdateSpriteAnimation(dir);
+        UpdateSpriteAnimation(dir, dt);
         HandleInventoryInput();
         HandleInteractInput();
     }
@@ -91,19 +94,19 @@ public partial class PlayerController : CharacterBody2D
 
     private void SetIdlePose()
     {
-        // Front view = first column (x=0)
-        _sprite.RegionRect = new Rect2(0, 0, _frameWidth, _spriteHeight);
+        // Front view = first column; inset 1px on right edge to stop seam bleed
+        _sprite.RegionRect = new Rect2(0, 0, _frameWidth - 1, _spriteHeight);
         _sprite.FlipH = false;
     }
 
     private void SetWalkPose(bool movingRight)
     {
-        // Side view = second column (x = frameWidth)
-        _sprite.RegionRect = new Rect2(_frameWidth, 0, _frameWidth, _spriteHeight);
-        _sprite.FlipH = !movingRight; // flip for left movement
+        // Side view = second column; inset 1px on both interior edges to stop seam bleed
+        _sprite.RegionRect = new Rect2(_frameWidth + 1, 0, _frameWidth - 2, _spriteHeight);
+        _sprite.FlipH = !movingRight;
     }
 
-    private void UpdateSpriteAnimation(float direction)
+    private void UpdateSpriteAnimation(float direction, float dt)
     {
         if (Mathf.Abs(direction) > 0.05f)
         {
@@ -111,10 +114,16 @@ public partial class PlayerController : CharacterBody2D
             if (_facingRight != right)
                 _facingRight = right;
             SetWalkPose(_facingRight);
+
+            // Walk-bob: subtle up/down displacement creates a footstep rhythm
+            _walkPhase += dt * 10f;
+            float bob = Mathf.Sin(_walkPhase * 2f) * 2.5f;
+            _sprite.Offset = new Vector2(0, _baseOffsetY + bob);
         }
         else
         {
             SetIdlePose();
+            _sprite.Offset = new Vector2(0, _baseOffsetY);
         }
     }
 
@@ -135,7 +144,8 @@ public partial class PlayerController : CharacterBody2D
     private void HandleInteractInput()
     {
         if (!Input.IsActionJustPressed("interact")) return;
-        if (DialogueManager.Instance.IsShowing) return; // DialogueManager handles E itself
+        if (DialogueManager.Instance.IsShowing) return;  // DialogueManager handles E itself
+        if (DialogueManager.Instance.JustFinished) return; // same E press that closed dialogue
 
         var interactable = GameManager.NearestInteractable;
         interactable?.Interact(this);

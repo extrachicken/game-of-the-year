@@ -32,9 +32,9 @@ public partial class HallwayScene : RoomBase
         AddColorRect(new Rect2(tableX - 57, tableY + 15, 9, 75), new Color(0.32f, 0.18f, 0.07f));  // left leg
         AddColorRect(new Rect2(tableX + 48, tableY + 15, 9, 75), new Color(0.32f, 0.18f, 0.07f));  // right leg
 
-        // ── Apple item ────────────────────────────────────────────────────────
+        // ── Apple item — placed at floor level so the player hitbox always reaches it
         var apple = new ItemData("apple", "Apple", "A fresh green apple.", new Color(0.15f, 0.7f, 0.15f));
-        AddItem(apple, new Vector2(tableX, tableY - 21f));
+        AddItem(apple, new Vector2(tableX, FloorY - 21f));
 
         // ── Key item (near bedroom door) ──────────────────────────────────────
         var key = new ItemData("key", "Key", "An old brass key.", new Color(0.85f, 0.65f, 0.1f));
@@ -87,14 +87,7 @@ public partial class HallwayScene : RoomBase
 
         GameManager.OrbIntroShown = true;
 
-        var lines = new System.Collections.Generic.List<DialogueLine>
-        {
-            new("Orb",    "This house feels strange... maybe we should check the kitchen first."),
-            new("Player", "You always say that."),
-            new("Orb",    "And I'm usually right."),
-            new("Orb",    "Also — is that an apple on the table? Might be useful."),
-        };
-        DialogueManager.Instance.StartDialogue(lines);
+        DialogueManager.Instance.StartDialogue(GameDialogues.OrbIntro());
     }
 
     private void AddLamp(Vector2 pos)

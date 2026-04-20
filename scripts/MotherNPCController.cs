@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections.Generic;
 
 /// Mother NPC — stands in the kitchen, gives the "Help Mother" quest.
 /// Inherits InteractableBase (Area2D) so the player can talk to her with E.
@@ -53,53 +52,25 @@ public partial class MotherNPCController : InteractableBase
 
     // ─── Dialogue flows ───────────────────────────────────────────────────────
 
-    private void GiveQuest()
-    {
-        var lines = new List<DialogueLine>
-        {
-            new("Mother",  "Oh, there you are. I've been looking for you."),
-            new("Mother",  "Could you bring me the apple from the hallway table?"),
-            new("Mother",  "I'd get it myself, but my back has been acting up today..."),
-            new("Player",  "Sure, I'll get it for you."),
-            new("Orb",     "An apple? Simple enough. It should be on that table back in the hallway."),
-        };
-        DialogueManager.Instance.StartDialogue(lines, onComplete: StartQuest);
-    }
+    private void GiveQuest() =>
+        DialogueManager.Instance.StartDialogue(GameDialogues.MotherGiveQuest(), onComplete: StartQuest);
 
     private void StartQuest()
     {
         _state = QuestState.Active;
-        var quest = new QuestData(
+        QuestManager.Instance.StartQuest(new QuestData(
             QuestId,
             "Help Mother",
             "Bring the apple from the hallway table to Mother.",
             RequiredItemId
-        );
-        QuestManager.Instance.StartQuest(quest);
+        ));
     }
 
-    private void NoItemYet()
-    {
-        var lines = new List<DialogueLine>
-        {
-            new("Mother",  "Did you find the apple?"),
-            new("Player",  "Not yet. I'll keep looking."),
-            new("Orb",     "It's on the table in the hallway. Hard to miss, actually."),
-        };
-        DialogueManager.Instance.StartDialogue(lines);
-    }
+    private void NoItemYet() =>
+        DialogueManager.Instance.StartDialogue(GameDialogues.MotherNoItemYet());
 
-    private void CompleteQuestDialogue()
-    {
-        var lines = new List<DialogueLine>
-        {
-            new("Mother",  "Oh, you found it! Thank you so much."),
-            new("Player",  "Happy to help."),
-            new("Mother",  "You're a good child. Now go rest — the house has been... strange lately."),
-            new("Orb",     "Strange. Yes. That's one word for it."),
-        };
-        DialogueManager.Instance.StartDialogue(lines, onComplete: FinishQuest);
-    }
+    private void CompleteQuestDialogue() =>
+        DialogueManager.Instance.StartDialogue(GameDialogues.MotherCompleteQuest(), onComplete: FinishQuest);
 
     private void FinishQuest()
     {
@@ -108,14 +79,8 @@ public partial class MotherNPCController : InteractableBase
         QuestManager.Instance.CompleteQuest(QuestId);
     }
 
-    private void ThanksAgain()
-    {
-        var lines = new List<DialogueLine>
-        {
-            new("Mother", "Thank you again, dear. That apple was just what I needed."),
-        };
-        DialogueManager.Instance.StartDialogue(lines);
-    }
+    private void ThanksAgain() =>
+        DialogueManager.Instance.StartDialogue(GameDialogues.MotherThanksAgain());
 
     // ─── Visual ──────────────────────────────────────────────────────────────
 
